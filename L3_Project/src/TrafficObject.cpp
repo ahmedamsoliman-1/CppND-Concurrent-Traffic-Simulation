@@ -8,6 +8,8 @@ int TrafficObject::_idCnt = 0;
 
 // L3.2 : Add a static mutex to the base class TrafficObject (called _mtxCout) and properly instantiate it in the source file. This mutex will be used in the next task to protect standard-out. 
 
+std::mutex TrafficObject::_mtxCout;
+
 void TrafficObject::setPosition(double x, double y)
 {
     _posX = x;
@@ -30,6 +32,9 @@ TrafficObject::~TrafficObject()
 {
     // set up thread barrier before this object is destroyed
     std::for_each(threads.begin(), threads.end(), [](std::thread &t) {
-        t.join();
+        if (t.joinable())
+        {
+            t.join();
+        }
     });
 }
