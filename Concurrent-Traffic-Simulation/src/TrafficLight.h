@@ -7,6 +7,8 @@
 #include "TrafficObject.h"
 
 // forward declarations to avoid include cycle
+class Vehicle;
+
 enum class TrafficLightPhase 
 {
     red = 0, green
@@ -22,13 +24,13 @@ class MessageQueue
 {
     
 public:
-	void send(T&& msge);
+	void send(T&& msg);
     T receive();
 
 private:
 	std::deque<T> _queue;
-    std::condition_variable _condition;
-    std::mutex _mutex;
+    std::condition_variable condition;
+    std::mutex mutex;
 };
 
 // FP.1 : Define a class „TrafficLight“ which is a child class of TrafficObject. 

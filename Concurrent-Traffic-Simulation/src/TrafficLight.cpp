@@ -1,5 +1,6 @@
 #include <iostream>
 #include <random>
+#include <ctime>
 #include "TrafficLight.h"
 
 /* Implementation of class "MessageQueue" */
@@ -12,28 +13,27 @@ T MessageQueue<T>::receive()
     // to wait for and receive new messages and pull them from the queue using move semantics. 
     // The received object should then be returned by the receive function. 
     
-    std::unique_lock<std::mutex> lock(_mutex);
-    _condition.wait(lock, [this] 
+    std::unique_lock<std::mutex> lock(mutex);
+    condition.wait(lock, [this] 
     {
         return !_queue.empty();
     }
     );
     T message = std::move(_queue.back());
     _queue.pop_back();
-
     return message;
 
 }
 
 template <typename T>
-void MessageQueue<T>::send(T &&msge)
+void MessageQueue<T>::send(T &&message)
 {
     // FP.4a : The method send should use the mechanisms std::lock_guard<std::mutex> 
     // as well as _condition.notify_one() to add a new message to the queue and afterwards send a notification.
 
-    std::lock_guard<std::mutex> lock(_mutex);
-    _queue.push_back(std::move(msge));
-    _condition.notify_one();
+    std::lock_guard<std::mutex> lock(mutex);
+    _queue.push_back(std::move(message));
+    condition.notify_one();
 }
 
 
@@ -57,8 +57,8 @@ void TrafficLight::waitForGreen()
 
     while (true)
     {
-        TrafficLightPhase Phase = messageQ.receive();
-        if (Phase == TrafficLightPhase::green)
+        TrafficLightPhase phase = messageQ.receive();
+        if (phase == TrafficLightPhase::green)
         {
             return ;
         }
@@ -84,19 +84,24 @@ void TrafficLight::cycleThroughPhases()
     // to the message queue using move semantics. The cycle duration should be a random value between 4 and 6 seconds. 
     // Also, the while-loop should use std::this_thread::sleep_for to wait 1ms between two cycles.
 
-    while(true)
+    while(!false)
     {
-    if (_currentPhase == TrafficLightPhase::red)
-    {
-      _currentPhase = TrafficLightPhase::green;
-    }
-    else
-    {
-      _currentPhase = TrafficLightPhase::red;
-    }
+        auto rand_nm = (rand()%5555)+3333;
+        // std::cout << "-------------------------" << num << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(rand_nm));
 
-    messageQ.send(std::move(_currentPhase));
-    
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        if (_currentPhase == TrafficLightPhase::red)
+        {
+            _currentPhase = TrafficLightPhase::green;
+        }
+        else
+        {
+            _currentPhase = TrafficLightPhase::red;
+        }
+
+        messageQ.send(std::move(_currentPhase));
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
   }
 }
