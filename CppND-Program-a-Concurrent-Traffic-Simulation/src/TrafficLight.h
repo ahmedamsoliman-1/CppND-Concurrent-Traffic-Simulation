@@ -24,7 +24,9 @@ public:
     void MessageQueue<T>::send(T &&msg);
 
 private:
-    
+    std::dequeue<T> _queue;             //Store objects of TrafficLightPhases
+    std::condition_variable condition;
+    std::mutex mutex; 
 };
 
 // FP.1 : Define a class „TrafficLight“ which is a child class of TrafficObject. 
