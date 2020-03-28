@@ -20,11 +20,11 @@ template <class T>
 class MessageQueue
 {
 public:
-    T MessageQueue<T>::receive();
-    void MessageQueue<T>::send(T &&msg);
+    T receive();
+    void send(T &&message);
 
 private:
-    std::dequeue<T> _queue;             //Store objects of TrafficLightPhases
+    std::deque<T> _queue;             //Store objects of TrafficLightPhases
     std::condition_variable condition;
     std::mutex mutex; 
 };

@@ -19,14 +19,14 @@ T MessageQueue<T>::receive()
 }
 
 template <typename T>
-void MessageQueue<T>::send(T &&msg)
+void MessageQueue<T>::send(T &&message)
 {
     // FP.4a : The method send should use the mechanisms std::lock_guard<std::mutex> 
     // as well as _condition.notify_one() to add a new message to the queue and afterwards send a notification.
 
     std::lock_guard<std::mutex> lock(mutex);
-    _queue.push_back(std::move(msg))
-    condition.notify_all();
+    _queue.push_back(std::move(message));
+    condition.notify_one();
 }
 
 
@@ -49,7 +49,7 @@ void TrafficLight::waitForGreen()
     // runs and repeatedly calls the receive function on the message queue. 
     // Once it receives TrafficLightPhase::green, the method returns.
 
-    while (!false)
+    while (true)
     {
         TrafficLightPhase phase = messageQ.receive();
         if (phase == TrafficLightPhase::green)
@@ -79,8 +79,10 @@ void TrafficLight::cycleThroughPhases()
     // to the message queue using move semantics. The cycle duration should be a random value between 4 and 6 seconds. 
     // Also, the while-loop should use std::this_thread::sleep_for to wait 1ms between two cycles. 
 
-    while (!false)
+    while (true)
     {
+        // auto rando_generated = (rand()%5555)+3333;
+        // std::cout << "rendomly genereated ----------" << num << std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds((rand()%5555)+3333)); 
 
         if (_currentPhase == TrafficLightPhase::red)
