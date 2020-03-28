@@ -20,6 +20,8 @@ template <class T>
 class MessageQueue
 {
 public:
+    T MessageQueue<T>::receive();
+    void MessageQueue<T>::send(T &&msg);
 
 private:
     
