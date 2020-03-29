@@ -11,8 +11,10 @@ T MessageQueue<T>::receive()
     // FP.5a : The method receive should use std::unique_lock<std::mutex> and _condition.wait() 
     // to wait for and receive new messages and pull them from the queue using move semantics. 
     // The received object should then be returned by the receive function. 
-    std::unique_lock<std::mutex> lock(mutex);
-    condition.wait(lock, [this] { return !_queue.empty(); });
+
+    // perform queue modification under the lock
+    std::unique_lock<std::mutex> unique_lock(mutex);
+    condition.wait(unique_lock, [this] { return !_queue.empty(); });
     T message = std::move(_queue.back());
     _queue.pop_back();
     return message;
@@ -24,7 +26,7 @@ void MessageQueue<T>::send(T &&message)
     // FP.4a : The method send should use the mechanisms std::lock_guard<std::mutex> 
     // as well as _condition.notify_one() to add a new message to the queue and afterwards send a notification.
 
-    std::lock_guard<std::mutex> lock(mutex);
+    std::lock_guard<std::mutex> unique_lock(mutex);
     _queue.push_back(std::move(message));
     condition.notify_one();
 }
@@ -81,8 +83,11 @@ void TrafficLight::cycleThroughPhases()
 
     while (true)
     {
-        // auto rando_generated = (rand()%5555)+3333;
-        // std::cout << "rendomly genereated ----------" << num << std::endl;
+        // // srand(time(0));
+        // auto gn = ((rand()%5000)+4000);
+        // std::cout << gn << std::endl;
+
+        // std::this_thread::sleep_for(std::chrono::milliseconds(gn)); 
         std::this_thread::sleep_for(std::chrono::milliseconds((rand()%5555)+3333)); 
 
         if (_currentPhase == TrafficLightPhase::red)
